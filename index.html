@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>AJAX Predict</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+	<form action="" class="search-form">
+		<input type="text" class="search" placeholder="Enter a country...">
+		<ul class="suggestions">
+			<li class="lCase">...to see its domain name.</li>
+		</ul>
+	</form>
+
+	<script>
+		
+		const endpoint = "https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-domain-tld.json";
+	
+		const countries = [];
+		
+		fetch(endpoint)
+			.then(blob => blob.json())
+			.then(data => countries.push(...data));		//spread operator "spreads" JS expressions
+																								//into individual elements
+		function matchString(str, countries) {
+			return countries.filter(place => {
+				//find out if search string matches country in JSON file
+				const regex = new RegExp(str, "gi");
+				return place.country.match(regex);
+			});
+		}
+		
+		function showMatches() {
+			const matchArr = matchString(this.value, countries);
+			const markup = matchArr.map(place => {
+				const regex = new RegExp(this.value, "gi");
+				const countryName = place.country.replace(regex, `<span class="hl">${this.value}</span>`);
+				const domainName = place.tld.replace(regex, `<span class="hl">${this.value}</span>`)
+
+				return `
+					<li>
+						<span class="name">${countryName}</span>
+						<span class="domain lCase">${domainName}</span>
+					</li>
+				`;
+			}).join("");
+			suggestions.innerHTML = markup;
+		}
+		
+		const srcInput = document.querySelector(".search");
+		const suggestions = document.querySelector(".suggestions");
+		
+		srcInput.addEventListener("change", showMatches);
+		srcInput.addEventListener("keyup", showMatches);
+		
+	</script>
+
+</body>
+
+</html>
